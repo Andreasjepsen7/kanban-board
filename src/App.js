@@ -31,7 +31,11 @@ function App() {
   const [draggedCard, setDraggedCard] = useState(null);
   const [editingCard, setEditingCard] = useState(null);
   const [editedContent, setEditedContent] = useState("");
-  const [newCardContent, setNewCardContent] = useState("");
+
+  // Define separate state variables for new card content in each column
+  const [newCardContentTodo, setNewCardContentTodo] = useState("");
+  const [newCardContentInProgress, setNewCardContentInProgress] = useState("");
+  const [newCardContentDone, setNewCardContentDone] = useState("");
 
   const handleDragStart = (e, card) => {
     setDraggedCard(card);
@@ -83,12 +87,23 @@ function App() {
   };
 
   const handleAddNewCard = (columnId) => {
+    let newCardContent = "";
+    if (columnId === "todo") {
+      newCardContent = newCardContentTodo;
+      setNewCardContentTodo("");
+    } else if (columnId === "inProgress") {
+      newCardContent = newCardContentInProgress;
+      setNewCardContentInProgress("");
+    } else if (columnId === "done") {
+      newCardContent = newCardContentDone;
+      setNewCardContentDone("");
+    }
+
     if (newCardContent) {
       const newCard = { id: `task${Date.now()}`, content: newCardContent };
       const updatedColumns = { ...columns };
       updatedColumns[columnId].cards.push(newCard);
       setColumns(updatedColumns);
-      setNewCardContent("");
     }
   };
 
@@ -151,15 +166,29 @@ function App() {
                   {card.content}
                 </div>
               )}
-              <button onClick={() => handleDeleteCard(card)}>Delete</button>
+             <button onClick={() => handleDeleteCard({ id: card.id, columnId: column.id })}>Delete</button>
             </div>
           ))}
           <div>
             <input
               type="text"
               placeholder="Add a new card"
-              value={newCardContent}
-              onChange={(e) => setNewCardContent(e.target.value)}
+              value={
+                column.id === "todo"
+                  ? newCardContentTodo
+                  : column.id === "inProgress"
+                  ? newCardContentInProgress
+                  : newCardContentDone
+              }
+              onChange={(e) => {
+                if (column.id === "todo") {
+                  setNewCardContentTodo(e.target.value);
+                } else if (column.id === "inProgress") {
+                  setNewCardContentInProgress(e.target.value);
+                } else if (column.id === "done") {
+                  setNewCardContentDone(e.target.value);
+                }
+              }}
             />
             <button onClick={() => handleAddNewCard(column.id)}>Add</button>
           </div>
